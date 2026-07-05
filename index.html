@@ -7,107 +7,194 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+
 body{
-  font-family:Arial,sans-serif;
+  font-family:Arial, sans-serif;
   min-height:100vh;
-  background:#eef3f8;
+  background:linear-gradient(180deg,#eef5fb,#f7fbff);
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:16px;
+  padding:14px;
+  overflow-x:hidden;
 }
+
 .app{
   width:100%;
-  max-width:760px;
+  max-width:780px;
   background:white;
-  border-radius:24px;
-  padding:24px;
+  border-radius:26px;
+  padding:22px;
   text-align:center;
-  box-shadow:0 20px 50px rgba(0,0,0,.12);
+  box-shadow:0 20px 55px rgba(23,70,120,.16);
+  position:relative;
+  overflow:hidden;
 }
+
 h1{
   color:#1477ff;
-  font-size:34px;
+  font-size:32px;
   margin-bottom:8px;
 }
+
 .subtitle{
-  font-size:18px;
+  font-size:17px;
   margin-bottom:16px;
+  color:#1f2937;
 }
+
+.progress-line{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:8px 0 8px;
+  font-size:16px;
+  font-weight:bold;
+  color:#1477ff;
+}
+
 .progress-wrap{
   height:18px;
-  background:#dde7f2;
-  border-radius:99px;
+  background:#dfeaf5;
+  border-radius:999px;
   overflow:hidden;
-  margin:12px 0 18px;
+  margin-bottom:18px;
 }
+
 .progress{
   height:100%;
   width:0%;
-  background:#1477ff;
-  transition:.25s;
+  background:linear-gradient(90deg,#1477ff,#57b6ff);
+  transition:width .18s ease;
 }
-.percent{
-  font-weight:bold;
-  color:#1477ff;
-  margin-bottom:8px;
-}
+
 .stage{
   position:relative;
   width:100%;
-  border-radius:18px;
+  border-radius:20px;
   overflow:hidden;
   background:#ddd;
   touch-action:none;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
 }
+
 .stage img{
   width:100%;
   display:block;
+  user-select:none;
+  pointer-events:none;
 }
+
 #canvas{
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
-  cursor:pointer;
+  cursor:crosshair;
   touch-action:none;
 }
+
+.foam{
+  position:absolute;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:rgba(255,255,255,.86);
+  pointer-events:none;
+  animation:foam .9s ease-out forwards;
+  box-shadow:0 0 16px rgba(255,255,255,.75);
+}
+
+@keyframes foam{
+  0%{transform:scale(.4);opacity:.9}
+  100%{transform:scale(1.8) translateY(-18px);opacity:0}
+}
+
 .finish{
   display:none;
   margin-top:18px;
-  padding:18px;
-  border-radius:18px;
-  background:#f3f8ff;
+  padding:20px;
+  border-radius:20px;
+  background:linear-gradient(180deg,#f3f8ff,#ffffff);
+  border:1px solid #e4eefb;
 }
+
 .finish h2{
   color:#1477ff;
   margin-bottom:8px;
+  font-size:26px;
 }
+
+.finish p{
+  font-size:17px;
+  color:#1f2937;
+  line-height:1.45;
+}
+
 button{
   margin-top:14px;
   border:0;
-  border-radius:14px;
-  padding:14px 22px;
+  border-radius:16px;
+  padding:15px 22px;
   font-size:17px;
   cursor:pointer;
   background:#1477ff;
   color:white;
   font-weight:bold;
+  box-shadow:0 8px 18px rgba(20,119,255,.25);
 }
+
+button:active{transform:scale(.98)}
+
 .secondary{
-  background:#e8eef7;
+  background:#eaf1f8;
   color:#1b1b1b;
+  box-shadow:none;
+}
+
+.hint{
+  margin-top:12px;
+  color:#64748b;
+  font-size:14px;
+}
+
+.confetti{
+  position:absolute;
+  width:10px;
+  height:16px;
+  top:-20px;
+  border-radius:3px;
+  animation:fall 1.8s ease-in forwards;
+  pointer-events:none;
+}
+
+@keyframes fall{
+  to{
+    transform:translateY(900px) rotate(620deg);
+    opacity:0;
+  }
+}
+
+@media(max-width:520px){
+  .app{padding:16px;border-radius:20px}
+  h1{font-size:25px}
+  .subtitle{font-size:15px}
+  button{width:100%;font-size:16px}
 }
 </style>
 </head>
 
 <body>
 
-<div class="app">
+<div class="app" id="app">
   <h1>✨ Магия чистого ковра</h1>
   <p class="subtitle">Проведите пальцем по ковру и увидите настоящее преображение</p>
 
-  <div class="percent">Очищено: <span id="percent">0</span>%</div>
+  <div class="progress-line">
+    <span>🧼 Очищено</span>
+    <span><span id="percent">0</span>%</span>
+  </div>
+
   <div class="progress-wrap">
     <div class="progress" id="progress"></div>
   </div>
@@ -119,19 +206,30 @@ button{
 
   <div class="finish" id="finish">
     <h2>🎉 Великолепно!</h2>
-    <p>Вы очистили ковёр. А мы сделаем это профессионально с настоящим ковром.</p>
+    <p>
+      Представьте, что это был ваш ковёр.<br>
+      Мы очистим настоящий профессионально и аккуратно.
+    </p>
+
     <button onclick="window.open('https://vk.com/ximchistkakovrov','_blank')">
       🚚 Заказать бесплатный забор ковра
     </button>
+
     <br>
-    <button class="secondary" onclick="location.reload()">Очистить ещё раз</button>
+
+    <button class="secondary" onclick="location.reload()">
+      Очистить ещё раз
+    </button>
   </div>
+
+  <div class="hint">Лучше всего работает пальцем на телефоне 👆</div>
 </div>
 
 <script>
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const stage = document.getElementById("stage");
+const app = document.getElementById("app");
 const percentText = document.getElementById("percent");
 const progress = document.getElementById("progress");
 const finish = document.getElementById("finish");
@@ -142,6 +240,7 @@ dirty.src = "До.jpg";
 let isDrawing = false;
 let cleanedPoints = new Set();
 let finished = false;
+let lastFoam = 0;
 
 function resizeCanvas(){
   const rect = stage.getBoundingClientRect();
@@ -150,6 +249,7 @@ function resizeCanvas(){
 
   if(dirty.complete){
     ctx.globalCompositeOperation = "source-over";
+    ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.drawImage(dirty, 0, 0, canvas.width, canvas.height);
   }
 }
@@ -161,7 +261,7 @@ function getPos(e){
   const rect = canvas.getBoundingClientRect();
   let clientX, clientY;
 
-  if(e.touches){
+  if(e.touches && e.touches.length){
     clientX = e.touches[0].clientX;
     clientY = e.touches[0].clientY;
   }else{
@@ -175,36 +275,97 @@ function getPos(e){
   };
 }
 
+function makeSoftBrush(x,y){
+  const brush = canvas.width * 0.085;
+  const gradient = ctx.createRadialGradient(x,y,brush*.12,x,y,brush);
+  gradient.addColorStop(0,"rgba(0,0,0,1)");
+  gradient.addColorStop(.65,"rgba(0,0,0,.75)");
+  gradient.addColorStop(1,"rgba(0,0,0,0)");
+
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(x,y,brush,0,Math.PI*2);
+  ctx.fill();
+  ctx.globalCompositeOperation = "source-over";
+}
+
+function addFoam(x,y){
+  const now = Date.now();
+  if(now - lastFoam < 70) return;
+  lastFoam = now;
+
+  for(let i=0;i<4;i++){
+    const dot = document.createElement("div");
+    dot.className = "foam";
+
+    const rect = stage.getBoundingClientRect();
+    const size = 10 + Math.random()*18;
+    dot.style.width = size + "px";
+    dot.style.height = size + "px";
+    dot.style.left = (x + rect.left - app.getBoundingClientRect().left + (Math.random()*46-23)) + "px";
+    dot.style.top = (y + rect.top - app.getBoundingClientRect().top + (Math.random()*46-23)) + "px";
+
+    app.appendChild(dot);
+    setTimeout(()=>dot.remove(),900);
+  }
+}
+
+function updateProgress(x,y){
+  const cell = 34;
+  const cx = Math.floor(x/cell);
+  const cy = Math.floor(y/cell);
+
+  for(let dx=-1; dx<=1; dx++){
+    for(let dy=-1; dy<=1; dy++){
+      cleanedPoints.add((cx+dx)+"-"+(cy+dy));
+    }
+  }
+
+  const totalCells = Math.ceil(canvas.width/cell) * Math.ceil(canvas.height/cell);
+  let percent = Math.min(100, Math.floor((cleanedPoints.size / totalCells) * 130));
+
+  percentText.textContent = percent;
+  progress.style.width = percent + "%";
+
+  if(percent >= 100 && !finished){
+    complete();
+  }
+}
+
 function clean(e){
   if(!isDrawing || finished) return;
   e.preventDefault();
 
   const {x,y} = getPos(e);
 
-  ctx.globalCompositeOperation = "destination-out";
+  makeSoftBrush(x,y);
+  addFoam(x,y);
+  updateProgress(x,y);
+}
 
-  const brush = canvas.width * 0.075;
+function complete(){
+  finished = true;
+  percentText.textContent = "100";
+  progress.style.width = "100%";
+  finish.style.display = "block";
+  confetti();
+  setTimeout(()=>{
+    finish.scrollIntoView({behavior:"smooth", block:"nearest"});
+  },250);
+}
 
-  ctx.beginPath();
-  ctx.arc(x, y, brush, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.globalCompositeOperation = "source-over";
-
-  const cellX = Math.floor(x / 28);
-  const cellY = Math.floor(y / 28);
-  cleanedPoints.add(cellX + "-" + cellY);
-
-  let percent = Math.min(100, Math.floor(cleanedPoints.size / 2.2));
-  percentText.textContent = percent;
-  progress.style.width = percent + "%";
-
-  if(percent >= 100){
-    finished = true;
-    finish.style.display = "block";
-    progress.style.width = "100%";
-    percentText.textContent = "100";
-    window.scrollTo({top: document.body.scrollHeight, behavior:"smooth"});
+function confetti(){
+  const colors = ["#1477ff","#57b6ff","#ffd166","#ef476f","#06d6a0"];
+  for(let i=0;i<70;i++){
+    const piece = document.createElement("div");
+    piece.className = "confetti";
+    piece.style.left = Math.random()*100 + "%";
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDelay = Math.random()*0.6 + "s";
+    piece.style.animationDuration = (1.2 + Math.random()*1.3) + "s";
+    app.appendChild(piece);
+    setTimeout(()=>piece.remove(),2500);
   }
 }
 
