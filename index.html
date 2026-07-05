@@ -3,175 +3,219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Магия чистого ковра</title>
 
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
+*{box-sizing:border-box;margin:0;padding:0}
 body{
-font-family:Arial,sans-serif;
-background:#eef2f6;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-overflow:hidden;
+  font-family:Arial,sans-serif;
+  min-height:100vh;
+  background:#eef3f8;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:16px;
 }
-
-.card{
-background:white;
-padding:30px;
-border-radius:20px;
-box-shadow:0 15px 40px rgba(0,0,0,.12);
-text-align:center;
-width:90%;
-max-width:700px;
+.app{
+  width:100%;
+  max-width:760px;
+  background:white;
+  border-radius:24px;
+  padding:24px;
+  text-align:center;
+  box-shadow:0 20px 50px rgba(0,0,0,.12);
 }
-
 h1{
-color:#1976ff;
-margin-bottom:10px;
+  color:#1477ff;
+  font-size:34px;
+  margin-bottom:8px;
 }
-
-p{
-margin-bottom:20px;
-font-size:18px;
+.subtitle{
+  font-size:18px;
+  margin-bottom:16px;
 }
-
-canvas{
-width:100%;
-max-width:600px;
-border-radius:15px;
-cursor:pointer;
-touch-action:none;
+.progress-wrap{
+  height:18px;
+  background:#dde7f2;
+  border-radius:99px;
+  overflow:hidden;
+  margin:12px 0 18px;
 }
-
+.progress{
+  height:100%;
+  width:0%;
+  background:#1477ff;
+  transition:.25s;
+}
+.percent{
+  font-weight:bold;
+  color:#1477ff;
+  margin-bottom:8px;
+}
+.stage{
+  position:relative;
+  width:100%;
+  border-radius:18px;
+  overflow:hidden;
+  background:#ddd;
+  touch-action:none;
+}
+.stage img{
+  width:100%;
+  display:block;
+}
+#canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  cursor:pointer;
+  touch-action:none;
+}
+.finish{
+  display:none;
+  margin-top:18px;
+  padding:18px;
+  border-radius:18px;
+  background:#f3f8ff;
+}
+.finish h2{
+  color:#1477ff;
+  margin-bottom:8px;
+}
 button{
-margin-top:25px;
-padding:15px 30px;
-border:none;
-background:#1976ff;
-color:white;
-font-size:20px;
-border-radius:12px;
-cursor:pointer;
-display:none;
+  margin-top:14px;
+  border:0;
+  border-radius:14px;
+  padding:14px 22px;
+  font-size:17px;
+  cursor:pointer;
+  background:#1477ff;
+  color:white;
+  font-weight:bold;
 }
-
-button:hover{
-background:#0b5fe0;
+.secondary{
+  background:#e8eef7;
+  color:#1b1b1b;
 }
-
 </style>
-
 </head>
 
 <body>
 
-<div class="card">
+<div class="app">
+  <h1>✨ Магия чистого ковра</h1>
+  <p class="subtitle">Проведите пальцем по ковру и увидите настоящее преображение</p>
 
-<h1>🧼 Очистите ковёр</h1>
+  <div class="percent">Очищено: <span id="percent">0</span>%</div>
+  <div class="progress-wrap">
+    <div class="progress" id="progress"></div>
+  </div>
 
-<p>Проведите пальцем или мышкой по ковру.</p>
+  <div class="stage" id="stage">
+    <img src="После.jpg" alt="Ковёр после чистки">
+    <canvas id="canvas"></canvas>
+  </div>
 
-<canvas id="canvas" width="600" height="400"></canvas>
-
-<button id="btn">
-Заказать профессиональную чистку
-</button>
-
+  <div class="finish" id="finish">
+    <h2>🎉 Великолепно!</h2>
+    <p>Вы очистили ковёр. А мы сделаем это профессионально с настоящим ковром.</p>
+    <button onclick="window.open('https://vk.com/ximchistkakovrov','_blank')">
+      🚚 Заказать бесплатный забор ковра
+    </button>
+    <br>
+    <button class="secondary" onclick="location.reload()">Очистить ещё раз</button>
+  </div>
 </div>
 
 <script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const stage = document.getElementById("stage");
+const percentText = document.getElementById("percent");
+const progress = document.getElementById("progress");
+const finish = document.getElementById("finish");
 
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const dirty = new Image();
+dirty.src = "До.jpg";
 
-const btn=document.getElementById("btn");
+let isDrawing = false;
+let cleanedPoints = new Set();
+let finished = false;
 
-const img=new Image();
+function resizeCanvas(){
+  const rect = stage.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
 
-img.crossOrigin="anonymous";
-
-img.src="https://images.unsplash.com/photo-1517705008128-361805f42e86?w=1200";
-
-img.onload=function(){
-
-ctx.drawImage(img,0,0,600,400);
-
-ctx.fillStyle="rgba(90,60,30,0.75)";
-ctx.fillRect(0,0,600,400);
-
+  if(dirty.complete){
+    ctx.globalCompositeOperation = "source-over";
+    ctx.drawImage(dirty, 0, 0, canvas.width, canvas.height);
+  }
 }
 
-let cleaned=0;
+dirty.onload = resizeCanvas;
+window.addEventListener("resize", resizeCanvas);
 
-function clean(x,y){
+function getPos(e){
+  const rect = canvas.getBoundingClientRect();
+  let clientX, clientY;
 
-ctx.save();
+  if(e.touches){
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  }else{
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
 
-ctx.globalCompositeOperation="destination-out";
-
-ctx.beginPath();
-
-ctx.arc(x,y,35,0,Math.PI*2);
-
-ctx.fill();
-
-ctx.restore();
-
-cleaned++;
-
-if(cleaned>180){
-
-btn.style.display="inline-block";
-
+  return {
+    x: clientX - rect.left,
+    y: clientY - rect.top
+  };
 }
 
+function clean(e){
+  if(!isDrawing || finished) return;
+  e.preventDefault();
+
+  const {x,y} = getPos(e);
+
+  ctx.globalCompositeOperation = "destination-out";
+
+  const brush = canvas.width * 0.075;
+
+  ctx.beginPath();
+  ctx.arc(x, y, brush, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.globalCompositeOperation = "source-over";
+
+  const cellX = Math.floor(x / 28);
+  const cellY = Math.floor(y / 28);
+  cleanedPoints.add(cellX + "-" + cellY);
+
+  let percent = Math.min(100, Math.floor(cleanedPoints.size / 2.2));
+  percentText.textContent = percent;
+  progress.style.width = percent + "%";
+
+  if(percent >= 100){
+    finished = true;
+    finish.style.display = "block";
+    progress.style.width = "100%";
+    percentText.textContent = "100";
+    window.scrollTo({top: document.body.scrollHeight, behavior:"smooth"});
+  }
 }
 
-let drawing=false;
+canvas.addEventListener("mousedown", e => {isDrawing=true; clean(e)});
+canvas.addEventListener("mousemove", clean);
+canvas.addEventListener("mouseup", () => isDrawing=false);
+canvas.addEventListener("mouseleave", () => isDrawing=false);
 
-canvas.addEventListener("mousedown",()=>drawing=true);
-
-canvas.addEventListener("mouseup",()=>drawing=false);
-
-canvas.addEventListener("mouseleave",()=>drawing=false);
-
-canvas.addEventListener("mousemove",(e)=>{
-
-if(!drawing)return;
-
-const r=canvas.getBoundingClientRect();
-
-clean(e.clientX-r.left,e.clientY-r.top);
-
-});
-
-canvas.addEventListener("touchmove",(e)=>{
-
-e.preventDefault();
-
-const r=canvas.getBoundingClientRect();
-
-const t=e.touches[0];
-
-clean(t.clientX-r.left,t.clientY-r.top);
-
-});
-
-btn.onclick=function(){
-
-window.open("https://vk.com/ximchistkakovrov","_blank");
-
-}
-
+canvas.addEventListener("touchstart", e => {isDrawing=true; clean(e)}, {passive:false});
+canvas.addEventListener("touchmove", clean, {passive:false});
+canvas.addEventListener("touchend", () => isDrawing=false);
 </script>
 
 </body>
