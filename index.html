@@ -1,35 +1,195 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Магия чистого ковра</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Магия чистого ковра</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;min-height:100vh;background:#eef5fb;display:flex;justify-content:center;align-items:center;padding:14px}
+.app{width:100%;max-width:820px;background:white;border-radius:26px;padding:22px;text-align:center;box-shadow:0 20px 55px rgba(20,70,120,.16)}
+h1{color:#1477ff;font-size:34px;margin-bottom:8px}
+.subtitle{font-size:18px;margin-bottom:14px}
+.status{font-size:18px;font-weight:bold;color:#1477ff;margin-bottom:8px}
+.progress-wrap{height:20px;background:#dfeaf5;border-radius:999px;overflow:hidden;margin-bottom:18px}
+.progress{height:100%;width:0%;background:#1477ff;transition:.2s}
+.stage{position:relative;width:100%;border-radius:22px;overflow:hidden;background:#ddd;touch-action:none}
+.stage img{width:100%;display:block;user-select:none;pointer-events:none}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.foam{position:absolute;border-radius:50%;background:rgba(255,255,255,.9);pointer-events:none;animation:foam .8s ease-out forwards}
+@keyframes foam{to{transform:scale(2) translateY(-15px);opacity:0}}
+.finish{display:none;margin-top:18px;padding:22px;border-radius:20px;background:#f3f8ff}
+.finish h2{color:#1477ff;margin-bottom:8px}
+button{margin-top:14px;border:0;border-radius:16px;padding:16px 22px;font-size:17px;background:#1477ff;color:white;font-weight:bold;cursor:pointer}
+.secondary{background:#eaf1f8;color:#111}
+</style>
 </head>
+
 <body>
-  <main class="app" id="app">
-    <h1>✨ Магия чистого ковра</h1>
-    <p class="subtitle">Проведите пальцем по ковру — как будто работает экстрактор</p>
+<div class="app" id="app">
+  <h1>✨ Магия чистого ковра</h1>
+  <p class="subtitle">Проведите пальцем по ковру и очистите его полностью</p>
 
-    <div class="status" id="status">🧼 Очищено: <span id="percent">0</span>%</div>
-    <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+  <div class="status">🧼 Очищено: <span id="percent">0</span>%</div>
+  <div class="progress-wrap"><div class="progress" id="progress"></div></div>
 
-    <section class="stage" id="stage">
-      <img src="После.jpg" alt="Ковёр после чистки">
-      <canvas id="canvas"></canvas>
-      <div class="extractor" id="extractor">💦</div>
-    </section>
+  <div class="stage" id="stage">
+    <img src="После.jpg">
+    <canvas id="canvas"></canvas>
+  </div>
 
-    <section class="finish" id="finish">
-      <h2>🎉 Великолепно!</h2>
-      <p>Представьте, что это был ваш ковёр. Мы очистим настоящий профессионально, аккуратно и с заботой.</p>
-      <button onclick="window.open('https://vk.com/club225727068','_blank')">💬 Записаться на чистку</button>
-      <button class="secondary" onclick="location.reload()">Очистить ещё раз</button>
-    </section>
+  <div class="finish" id="finish">
+    <h2>🎉 Ковёр очищен!</h2>
+    <p>Хотите такой же результат для своего ковра?</p>
+    <button onclick="window.open('https://vk.com/club225727068','_blank')">💬 Записаться на чистку</button>
+    <br>
+    <button class="secondary" onclick="location.reload()">Очистить ещё раз</button>
+  </div>
+</div>
 
-    <p class="hint">Лучше всего работает пальцем на телефоне 👆</p>
-  </main>
+<script>
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+const stage=document.getElementById("stage");
+const app=document.getElementById("app");
+const percentText=document.getElementById("percent");
+const progress=document.getElementById("progress");
+const finish=document.getElementById("finish");
 
-  <script src="script.js"></script>
+const dirty=new Image();
+dirty.src="До.jpg";
+
+let drawing=false;
+let finished=false;
+let grid=[];
+let cols=0;
+let rows=0;
+let cell=18;
+
+function resize(){
+  const r=stage.getBoundingClientRect();
+  canvas.width=r.width;
+  canvas.height=r.height;
+
+  cols=Math.ceil(canvas.width/cell);
+  rows=Math.ceil(canvas.height/cell);
+  grid=new Array(cols*rows).fill(false);
+
+  if(dirty.complete){
+    ctx.globalCompositeOperation="source-over";
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(dirty,0,0,canvas.width,canvas.height);
+  }
+}
+
+dirty.onload=resize;
+window.addEventListener("resize",resize);
+
+function getPos(e){
+  const r=canvas.getBoundingClientRect();
+  const p=e.touches ? e.touches[0] : e;
+  return {x:p.clientX-r.left,y:p.clientY-r.top};
+}
+
+function cleanArea(x,y){
+  const brush=canvas.width*0.11;
+
+  const g=ctx.createRadialGradient(x,y,brush*.1,x,y,brush);
+  g.addColorStop(0,"rgba(0,0,0,1)");
+  g.addColorStop(.65,"rgba(0,0,0,.8)");
+  g.addColorStop(1,"rgba(0,0,0,0)");
+
+  ctx.globalCompositeOperation="destination-out";
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.arc(x,y,brush,0,Math.PI*2);
+  ctx.fill();
+  ctx.globalCompositeOperation="source-over";
+
+  markGrid(x,y,brush);
+  foam(x,y);
+}
+
+function markGrid(x,y,brush){
+  const minX=Math.max(0,Math.floor((x-brush)/cell));
+  const maxX=Math.min(cols-1,Math.floor((x+brush)/cell));
+  const minY=Math.max(0,Math.floor((y-brush)/cell));
+  const maxY=Math.min(rows-1,Math.floor((y+brush)/cell));
+
+  for(let gy=minY;gy<=maxY;gy++){
+    for(let gx=minX;gx<=maxX;gx++){
+      const cx=gx*cell+cell/2;
+      const cy=gy*cell+cell/2;
+      const d=Math.hypot(cx-x,cy-y);
+      if(d<brush*0.85){
+        grid[gy*cols+gx]=true;
+      }
+    }
+  }
+
+  updatePercent();
+}
+
+function updatePercent(){
+  const cleaned=grid.filter(Boolean).length;
+  const total=grid.length;
+  let percent=Math.floor(cleaned/total*100);
+
+  if(percent>99) percent=99;
+
+  percentText.textContent=percent;
+  progress.style.width=percent+"%";
+
+  if(cleaned/total>=0.985 && !finished){
+    complete();
+  }
+}
+
+function complete(){
+  finished=true;
+
+  ctx.globalCompositeOperation="destination-out";
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.globalCompositeOperation="source-over";
+
+  percentText.textContent="100";
+  progress.style.width="100%";
+  finish.style.display="block";
+  finish.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+function foam(x,y){
+  const ar=app.getBoundingClientRect();
+  const sr=stage.getBoundingClientRect();
+
+  for(let i=0;i<4;i++){
+    const f=document.createElement("div");
+    f.className="foam";
+    const s=8+Math.random()*18;
+    f.style.width=s+"px";
+    f.style.height=s+"px";
+    f.style.left=(x+sr.left-ar.left+Math.random()*50-25)+"px";
+    f.style.top=(y+sr.top-ar.top+Math.random()*50-25)+"px";
+    app.appendChild(f);
+    setTimeout(()=>f.remove(),800);
+  }
+}
+
+function move(e){
+  if(!drawing||finished)return;
+  e.preventDefault();
+  const p=getPos(e);
+  cleanArea(p.x,p.y);
+}
+
+canvas.addEventListener("mousedown",e=>{drawing=true;move(e)});
+canvas.addEventListener("mousemove",move);
+canvas.addEventListener("mouseup",()=>drawing=false);
+canvas.addEventListener("mouseleave",()=>drawing=false);
+
+canvas.addEventListener("touchstart",e=>{drawing=true;move(e)},{passive:false});
+canvas.addEventListener("touchmove",move,{passive:false});
+canvas.addEventListener("touchend",()=>drawing=false);
+</script>
 </body>
 </html>
