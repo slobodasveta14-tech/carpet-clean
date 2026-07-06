@@ -4,37 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Магия чистого ковра</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=7" />
 </head>
 <body>
   <main class="app" id="app">
-    <header class="hero">
-      <div class="badge">🧼 интерактивная чистка</div>
-      <h1>✨ Магия чистого ковра</h1>
-      <p class="subtitle">Проведите пальцем по ковру — щётка нанесёт пену, а экстрактор покажет чистый результат</p>
-    </header>
+    <div class="badge">🧼 интерактивная чистка</div>
+    <h1>✨ Магия чистого ковра</h1>
+    <p class="subtitle">Проведите пальцем по ковру — щётка нанесёт пену и покажет чистый результат</p>
 
-    <section class="panel">
-      <div class="status" id="status">Очищено: <span id="percent">0</span>%</div>
-      <div class="progress-wrap">
-        <div class="progress" id="progress"></div>
-      </div>
-      <div class="mini-note" id="note">Начните чистку с любого места ковра 👆</div>
-    </section>
+    <div class="status" id="status">Очищено: <span id="percent">0</span>%</div>
+    <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+    <div class="note" id="note">Начните чистку с любого места ковра 👆</div>
 
     <section class="stage" id="stage">
-      <img class="clean-img" src="После.jpg" alt="Ковёр после чистки">
+      <img src="После.jpg" alt="Ковёр после чистки">
       <canvas id="canvas"></canvas>
 
-      <div class="machine" id="machine">
-        <div class="machine-handle"></div>
-        <div class="machine-body">
-          <div class="machine-light"></div>
-          <div class="machine-window"></div>
+      <div class="brush" id="brush">
+        <div class="brush-handle"></div>
+        <div class="brush-body">
+          <div class="brush-light"></div>
         </div>
-        <div class="machine-nozzle"></div>
-        <div class="machine-bristles">
-          <span></span><span></span><span></span><span></span><span></span>
+        <div class="brush-nozzle"></div>
+        <div class="brush-bristles">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
       </div>
     </section>
@@ -46,9 +39,9 @@
       <button class="secondary" onclick="location.reload()">Очистить ещё раз</button>
     </section>
 
-    <p class="hint">Звук включится после первого касания — браузер разрешает звук только после действия пользователя 🔊</p>
+    <p class="hint">Звук включается после первого движения по ковру 🔊</p>
   </main>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=7"></script>
 </body>
 </html>
