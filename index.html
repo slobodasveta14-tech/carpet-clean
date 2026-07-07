@@ -4,43 +4,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Магия чистого ковра</title>
-  <link rel="stylesheet" href="style.css?v=9" />
+  <link rel="stylesheet" href="style.css?v=10" />
 </head>
 <body>
   <main class="app" id="app">
     <div class="badge">🧼 VK Mini App</div>
     <h1>✨ Магия чистого ковра</h1>
     <p class="subtitle">Проведите пальцем по ковру — щётка нанесёт пену и покажет чистый результат</p>
-
     <div class="status" id="status">Очищено: <span id="percent">0</span>%</div>
     <div class="progress-wrap"><div class="progress" id="progress"></div></div>
     <div class="note" id="note">Начните чистку с любого места ковра 👆</div>
-
     <section class="stage" id="stage">
-      <img src="После.jpg" alt="Ковёр после чистки">
+      <img id="cleanImage" src="После.jpg" alt="Ковёр после чистки">
       <canvas id="canvas"></canvas>
-
       <div class="brush" id="brush">
-        <div class="brush-handle"></div>
-        <div class="brush-body"><div class="brush-light"></div></div>
-        <div class="brush-nozzle"></div>
-        <div class="brush-bristles">
-          <span></span><span></span><span></span><span></span><span></span><span></span>
-        </div>
+        <div class="brush-handle"></div><div class="brush-body"><div class="brush-light"></div></div>
+        <div class="brush-nozzle"></div><div class="brush-bristles"><span></span><span></span><span></span><span></span><span></span><span></span></div>
       </div>
     </section>
-
     <section class="finish" id="finish">
       <h2>🎉 Ковёр очищен!</h2>
       <p>Хотите такой же результат для своего ковра? Напишите нам — рассчитаем стоимость и подскажем по забору.</p>
       <button class="primary" id="orderBtn">💬 Записаться на чистку</button>
       <button class="secondary" onclick="location.reload()">Очистить ещё раз</button>
     </section>
-
     <p class="hint">Звук включается после первого движения по ковру 🔊</p>
   </main>
-
   <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
-  <script src="script.js?v=9"></script>
+  <script src="script.js?v=10"></script>
 </body>
 </html>
